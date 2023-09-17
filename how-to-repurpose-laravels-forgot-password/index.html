@@ -21,11 +21,7 @@
                 </div>
                 <div class="md:text-right">
                     <a href="/work" class="text-xs md:text-xl hover:text-purple-500 hover:border-b-4 hover:border-purple-500 target:border-b-4 target:border-purple-500 ">Work</a>
-<<<<<<< Updated upstream
-                    <a href="/blog" class="ml-6 text-xs md:text-xl hover:text-purple-500 hover:border-b-4 hover:border-purple-500 target:border-b-4 target:border-purple-500 ">Blog</a>
-=======
                     <a href="/blog" class="ml-6 text-xs md:text-xl hover:text-purple-500 hover:border-b-4 hover:border-purple-500 target:border-b-4 target:border-purple-500 border-b-4 border-purple-800">Blog</a>
->>>>>>> Stashed changes
                     <a href="/contact" class="ml-6 text-xs md:text-xl hover:text-purple-500 hover:border-b-4 hover:border-purple-500 target:border-b-4 target:border-purple-500  ">Contact</a>
                 </div>
             </div>
@@ -41,7 +37,7 @@
       
     </h1>
     <h2 class="text-2xl mb-8 italic">
-      
+      Dive Into Laravel: Simplified User Provisioning.
     </h2>
   </div>
 </div>
@@ -56,28 +52,25 @@
 </center>
 <h2>Introduction</h2>
 <hr>
-<p>I was introduced to the Laravel framework when it was in version 5.0 and the more I've used it the more I see myself seeking out similar web frameworks for other languages. As the framework has matured I have been impressed at the many official plug-ins and features it has available to it. I truly enjoy how fast and simple it is to get your project set-up with a basic user authentication scaffold as illustrated by the following three commands:</p>
+<p>Ever since Laravel 5.0, I've been consistently impressed with its in-built features. A standout is its rapid project setup with user authentication. Here’s a look:</p>
 <pre class="language-bash"><code class="language-bash">  $ <span class="token function">composer</span> create-project --prefer-dist laravel/laravel <span class="token operator">&lt;</span>project-name<span class="token operator">></span>
   $ <span class="token builtin class-name">cd</span> <span class="token operator">&lt;</span>project-name<span class="token operator">></span>
   $ php artisan migrate
   $ php artisan make:auth</code></pre>
-<p>and that's all it takes to get you up and running with a registration page, login page, password reset page with token expiration functionality so that the password reset request sent via e-mail expires after a certain amount of time. Of course you still need to set-up a database and email server but Laravel provides temporary alternatives so that the developers focus on writing code. Again I marvel at all of this functionality you get out of the box.</p>
-<h2>Problem</h2>
+<p>With this, you have an authentication system. And while Laravel has its defaults, what if you need customization?</p>
+<h2>The Challenge</h2>
 <hr>
-<p>But sometimes however a one size fits all solution just doesn't cut it as experience tells us but thankfully since most of the heavy lifting was done by Laravel, adjusting the user provisioning becomes easy and straight forward. So without any more fanfare I present to you this exercise: Assuming an admin is provisioning the user on their behalf, how can we use what Laravel gives us to create a password-less user provisioning system that follows best practice security? How do we go about this if the user only provides us an email address and their first and last name?</p>
-<blockquote>
-<p>Disclaimer: This is just one way of implementing this functionality. The approach taken here was to not re-create the wheel and use what was already provided to us by Laravel itself!</p>
-</blockquote>
-<h2>Solution</h2>
+<p>How can we create a password-less user system with just an email and name? Let's dig in.</p>
+<h2>The Solution</h2>
 <hr>
-<p>As mentioned before, we will keep with the KISS principle and not re-invent the wheel so we will go with a Laravel-out-of-the-box set-up. We want to build functionality for a third party (admin) to create users given just three things: First name, last name and email. We also do not want to email out a temporary password because that's not all that secure. Having in mind these constraints, we will treat the user creation flow as if he's resetting their password.</p>
-<p>This leaves us with the following application flow:</p>
-<p>Retrieve the user's <code>first_name</code>, <code>last_name</code>, and <code>email</code>.
-Generate and save a temporary password for the user as well as generate an expiration token pair and save one key pair in the password_resets table.
-Send out an email to the user with the other key pair as part of the password (re)setting link.
-Profit.
-Once we have that down we can proceed to investigate how Laravel does its password reset functionality. Fortunately, I have already done a deep dive into the inner workings of Laravel's password reset code and I will spare you the trouble and simply point you to the appropriate methods required to complete our goal.</p>
-<p>The first modification comes to the default users table migration. In every vanilla Laravel installation the users table migration comes with a <code>name</code>, <code>email</code>, <code>password</code>, <code>remember_me</code> and <code>timestamp</code> fields. We'll go ahead and modify the users migration to accommodate for the first name, last name and remove the <code>remember_me</code> token.</p>
+<p>Rather than reinventing the wheel, we're using Laravel's default approach as if it's a password reset.</p>
+<p><strong>Application Flow:</strong></p>
+<ol>
+<li>Collect from the user their <code>first_name</code>, <code>last_name</code>, and <code>email</code>.</li>
+<li>Generate a temporary password and an expiration token. Store one key in the <code>password_resets</code> table.</li>
+<li>Email the user with a link to set their password.</li>
+</ol>
+<p>We'll modify the default users table migration to fit our needs:</p>
 <pre class="language-php"><code class="language-php">  <span class="token class-name static-context">Schema</span><span class="token operator">::</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'users'</span><span class="token punctuation">,</span> <span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token class-name type-declaration">Blueprint</span> <span class="token variable">$table</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token variable">$table</span><span class="token operator">-></span><span class="token function">bigIncrements</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'id'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token variable">$table</span><span class="token operator">-></span><span class="token keyword type-declaration">string</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'first_name'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -86,7 +79,10 @@ Once we have that down we can proceed to investigate how Laravel does its passwo
     <span class="token variable">$table</span><span class="token operator">-></span><span class="token keyword type-declaration">string</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'password'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token variable">$table</span><span class="token operator">-></span><span class="token function">timestamps</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-<p>With that out of the way we will now focus on building out the main core of the functionality. If you are curious all of the methods extracted can be found in the <code>DatabaseTokenRepository.php</code> class found under the <code>vendor/laravel/framework/src/Illuminate/Auth/Passwords</code> directory. The methods we will go over are the creation of the hashed key that we utilize to create a password reset token that is saved to the database. We will email out the hashed key and the users email as parameters of the password reset URL.</p>
+<p>Next, set up core functionalities:</p>
+<ul>
+<li><strong>Generate a Hashed Key and Token:</strong></li>
+</ul>
 <pre class="language-php"><code class="language-php">  <span class="token comment">/**
     * Create a hashed key for the user.
     *  
@@ -103,7 +99,6 @@ Once we have that down we can proceed to investigate how Laravel does its passwo
       <span class="token variable">$key</span> <span class="token operator">=</span> <span class="token function">hash_hmac</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sha256'</span><span class="token punctuation">,</span> <span class="token class-name static-context">Str</span><span class="token operator">::</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token number">40</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token variable">$key</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token keyword">return</span> <span class="token variable">$key</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
-<p>The hashed key generation is verbatim from the inner workings of Laravel. Here we can see that Laravel uses the application's key as a salt applied to the random string that is generated. With the hashed key generated we can save it for future use as well as utilize it to generate a token as we see below.</p>
 <pre class="language-php"><code class="language-php">  <span class="token comment">/**
     * Create a new token for the user.
     *
@@ -113,8 +108,9 @@ Once we have that down we can proceed to investigate how Laravel does its passwo
   <span class="token punctuation">{</span>
       <span class="token keyword">return</span> <span class="token class-name static-context">Hash</span><span class="token operator">::</span><span class="token function">make</span><span class="token punctuation">(</span><span class="token variable">$hashedKey</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
-<p>The token generator is very basic. Here the method accepts the hashed key we generated earlier and make a new hashed value from it using PHP's bcrypt encryption library. With these two pieces of information we can utilize them to issue password resets when the user wants to, as well as provision the user with a temporary password and prompt the user to set their real password via email.</p>
-<p>Now that we have a way to generate tokens we also need a method to compare the tokens for validity.</p>
+<ul>
+<li><strong>Token Comparison &amp; Deletion:</strong></li>
+</ul>
 <pre class="language-php"><code class="language-php">  <span class="token comment">/**
     * @param $token the emailed token
     * @param $hashedKey the saved key on the password_resets
@@ -124,7 +120,6 @@ Once we have that down we can proceed to investigate how Laravel does its passwo
   <span class="token punctuation">{</span>
     <span class="token keyword">return</span> <span class="token class-name static-context">Hash</span><span class="token operator">::</span><span class="token function">check</span><span class="token punctuation">(</span><span class="token variable">$token</span><span class="token punctuation">,</span> <span class="token variable">$hashedKey</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
-<p>To round out the functionality we need to delete the saved key(s) from the <code>password_resets</code> table on an adjustable time interval as well as the ability to delete a token record using a user's email.</p>
 <pre class="language-php"><code class="language-php">  <span class="token comment">/**
     * Delete expired tokens.
     *
@@ -147,13 +142,13 @@ Once we have that down we can proceed to investigate how Laravel does its passwo
   <span class="token punctuation">{</span>
       <span class="token class-name static-context">PasswordReset</span><span class="token operator">::</span><span class="token function">whereEmail</span><span class="token punctuation">(</span><span class="token variable">$email</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">delete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">}</span></code></pre>
-<p>We now have everything set-up for us to start implementing the feature request. First we need to generate the hashed key in order to generate a token with it.</p>
+<p>Implementation becomes straightforward. We create our token and keys:</p>
 <pre class="language-php"><code class="language-php">  <span class="token punctuation">{</span>
     <span class="token comment">//...</span>
     <span class="token variable">$hashedKey</span> <span class="token operator">=</span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">createHashedKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token variable">$token</span> <span class="token operator">=</span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">createNewToken</span><span class="token punctuation">(</span><span class="token variable">$hashedKey</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token comment">//...</span></code></pre>
-<p>We then save the generated token to our <code>password_resets</code> table as well as the user account with their temporary password:</p>
+<p>Then save the generated token to our <code>password_resets</code> table as well as the user account with their temporary password:</p>
 <pre class="language-php"><code class="language-php">  <span class="token comment">//..</span>
   <span class="token comment">// $input comes from a validated Illuminate\Http\Request object.</span>
   <span class="token comment">// A database transaction saves us from having incomplete data being stored.</span>
@@ -197,7 +192,7 @@ Once we have that down we can proceed to investigate how Laravel does its passwo
 </code></pre>
 <h2>In closing</h2>
 <hr>
-<p>If you've followed along with this guide then you should have the necessary back-end functionality to provision user accounts on behalf of others. The front-end work omitted here can serve as a nice little implementation challenge.</p>
+<p>Harnessing Laravel’s capabilities, you can now effortlessly provision users. Ready to tackle the frontend? Happy coding!</p>
 
 </section>
 
